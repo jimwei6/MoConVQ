@@ -11,6 +11,9 @@ from MoConVQCore.Utils.motion_dataset import MotionDataSet
 
 import os
 
+import time
+import json
+
 def flatten_dict(dd, separator='_', prefix=''):
     return { prefix + separator + k if prefix else k : v
              for kk, vv in dd.items()
@@ -73,6 +76,7 @@ if __name__ == "__main__":
     parser.add_argument('--gpu', type = int, default=0, help='gpu id')
     parser.add_argument('--cpu_b', type = int, default=0, help='cpu begin idx')
     parser.add_argument('--cpu_e', type = int, default=-1, help='cpu end idx')
+    parser.add_argument('--dataset_name', type=str, default='default')
     
     args = vars(parser.parse_args())
     model_args.update(args)
@@ -116,6 +120,8 @@ if __name__ == "__main__":
     period = 1000000
     
     momentum_list, net_force_list, total_momentum = [], [], []
+
+    start = time.time()
     info = agent.encode_seq_all(motion_data.observation, motion_data.observation)
     
     '''
@@ -148,7 +154,23 @@ if __name__ == "__main__":
             info_ = e.value
         new_observation, rwd, done, info = info_
         observation = new_observation
-        
+    end = time.time()
+    exec_time = (end - start)
+    filename = args['bvh-file']
+    file_path = args['dataset_name'] + '.json'
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as file:
+            json.dump({}, file)
+
+    # Opening JSON file
+    with open(file_path, 'r+') as openfile:
+        # Reading from json file
+        json_object = json.load(openfile)
+        openfile.seek(0)
+        json_object[filename[0]] = exec_time
+        openfile.truncate()
+        json.dump(json_object, openfile)
+
     if args['output_file'] == '':
         import time
         motion_name = os.path.join('out', f'track_{time.time()}.bvh')
