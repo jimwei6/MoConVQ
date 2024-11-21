@@ -57,16 +57,7 @@ def pos_imitation_successful(truth_pos_bvh, test_pos_bvh, min_frame, max_frame, 
     pos_diff = np.absolute(truth_pos - test_pos)
 
     stop = False
-    for i in range(max_frame - min_frame):
-        for j in range(len(JOINT_NAMES)):
-            if(np.any(np.absolute(truth_pos[i, j] - test_pos[i, j]) > POS_DIFF)):
-                print(i, j, JOINT_NAMES[j])
-                stop = True
-                break
-        if stop:
-            break
     if np.any(pos_diff > POS_DIFF):
-        print('Failed for position')
         return False
     return True
 
@@ -76,7 +67,6 @@ def rot_imitation_successful(truth_bvh, test_bvh, min_frame, max_frame):
     test_rot = np.array([get_relative_rot_of_joints(test_bvh, i, min_frame, TEST_ORDER)  for i in range(min_frame, max_frame)])
     rot_diff = np.absolute(truth_rot - test_rot)
     if np.any(rot_diff > ROT_DIFF):
-        print('Failed for rotation')
         return False
     return True
 
@@ -116,7 +106,6 @@ def evaluate_directories(truth_dir, test_dir, time_file, output_csv):
 
     i = 0
     for file_name in tqdm(truth_files, desc="Evaluating"):
-        print(file_name)
         truth_bvh = None 
         test_bvh = None 
         truth_path = os.path.join(truth_dir, file_name)
@@ -150,7 +139,6 @@ def evaluate_directories(truth_dir, test_dir, time_file, output_csv):
           **mean_position_error,
           **mean_rotation_error})
         break
-    print(results)
     # Create a DataFrame and save as CSV
     df = pd.DataFrame(results)
     df.to_csv(output_csv, index=False)
