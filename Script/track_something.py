@@ -167,7 +167,7 @@ if __name__ == "__main__":
         # Reading from json file
         json_object = json.load(openfile)
         openfile.seek(0)
-        json_object[filename[0]] = exec_time
+        json_object[filename[0].split('/')[-1]] = exec_time
         openfile.truncate()
         json.dump(json_object, openfile)
 
